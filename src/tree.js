@@ -12,8 +12,8 @@ class Tree {
     const startId = this.cnt;
     const self = this;
 
-    const index = { id: startId, node: obj };
-    indexes[this.cnt + ''] = index;
+    const index = { id: obj.id, node: obj };
+    indexes[obj.id] = index;
     this.cnt++;
 
     if (obj[self.childNodeName] && obj[self.childNodeName].length) {
@@ -22,15 +22,17 @@ class Tree {
 
     function walk(objs, parent) {
       const children = [];
-      objs.forEach(function(obj, i) {
+      objs.forEach(function (obj, i) {
         const index = {};
-        index.id = self.cnt;
+        index.id = obj.id;
         index.node = obj;
 
-        if (parent) index.parent = parent.id;
+        if (parent) {
+          index.parent = parent.id;
+        }
 
-        indexes[self.cnt + ''] = index;
-        children.push(self.cnt);
+        indexes[obj.id] = index;
+        children.push(obj.id);
         self.cnt++;
 
         if (obj[self.childNodeName] && obj[self.childNodeName].length)
@@ -38,10 +40,12 @@ class Tree {
       });
       parent[self.childNodeName] = children;
 
-      children.forEach(function(id, i) {
-        const index = indexes[id + ''];
-        if (i > 0) index.prev = children[i - 1];
-        if (i < children.length - 1) index.next = children[i + 1];
+      children.forEach(function (id, i) {
+        const index = indexes[id];
+        if (i > 0)
+          index.prev = children[i - 1];
+        if (i < children.length - 1)
+          index.next = children[i + 1];
       });
     }
 
@@ -49,8 +53,9 @@ class Tree {
   }
 
   getIndex(id) {
-    const index = this.indexes[id + ''];
-    if (index) return index;
+    const index = this.indexes[id];
+    if (index)
+      return index;
   }
 
   removeIndex(index) {
@@ -58,9 +63,9 @@ class Tree {
     del(index);
 
     function del(index) {
-      delete self.indexes[index.id + ''];
+      delete self.indexes[index.id];
       if (index[self.childNodeName] && index[self.childNodeName].length) {
-        index[self.childNodeName].forEach(function(child) {
+        index[self.childNodeName].forEach(function (child) {
           del(self.getIndex(child));
         });
       }
@@ -69,7 +74,9 @@ class Tree {
 
   get(id) {
     const index = this.getIndex(id);
-    if (index && index.node) return index.node;
+    if (index && index.node) {
+      return index.node;
+    }
     return null;
   }
 
@@ -95,11 +102,13 @@ class Tree {
 
   updateChildren(children) {
     children.forEach(
-      function(id, i) {
+      function (id, i) {
         const index = this.getIndex(id);
         index.prev = index.next = null;
-        if (i > 0) index.prev = children[i - 1];
-        if (i < children.length - 1) index.next = children[i + 1];
+        if (i > 0)
+          index.prev = children[i - 1];
+        if (i < children.length - 1)
+          index.next = children[i + 1];
       }.bind(this)
     );
   }
@@ -130,8 +139,8 @@ class Tree {
   insertBefore(obj, destId) {
     const destIndex = this.getIndex(destId);
     const parentId = destIndex.parent;
-    const i = this.getIndex(parentId)[this.childNodeName].indexOf(destId);
-    return this.insert(obj, parentId, i);
+    const indexItem = this.getIndex(parentId)[this.childNodeName].indexOf(destId);
+    return this.insert(obj, parentId, indexItem);
   }
 
   insertAfter(obj, destId) {
@@ -149,6 +158,9 @@ class Tree {
     const destIndex = this.getIndex(destId);
     destIndex[this.childNodeName] = destIndex[this.childNodeName] || [];
     return this.insert(obj, destId, destIndex[this.childNodeName].length);
+  }
+  move(fromId, toId, placement) {
+
   }
 }
 
